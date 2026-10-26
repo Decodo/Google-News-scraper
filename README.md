@@ -1,9 +1,9 @@
 # Google News Scraper
-![Python Version](https://img.shields.io/badge/python-3.13%2B-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)
 ![License](https://img.shields.io/github/license/decodo/Google-News-scraper)
 
 <p align="center">
-<a href="https://dashboard.decodo.com/scrapers/pricing?utm_source=github&utm_medium=social&utm_campaign=googlenewsscraper"><img src="https://github.com/user-attachments/assets/13b08523-32b0-4c85-8e99-580d7c2a9055"></a>
+<a href="https://dashboard.decodo.com/?page=residential-proxies&utm_source=socialorganic&utm_medium=social&utm_campaign=resi_trial_GITHUB"><img src="https://github.com/user-attachments/assets/60bb48bd-8dcc-48b2-82c9-a218e1e4449c"></a>
 </p>
 
 [![](https://dcbadge.vercel.app/api/server/Ja8dqKgvbZ)](https://discord.gg/Ja8dqKgvbZ)
@@ -12,63 +12,71 @@
 [Google News](https://news.google.com/) is a powerful news aggregator that collects and organizes news articles from various news sources worldwide. You can browse articles directly on the Google News web page or access specific categories, like business, technology, or sports, based on your interests.
 
 ## What is a Google News scraper?
-This is a Google News scraper that lets you extract headlines, summaries, sources, and publication dates from Google News search results using automated scripts.
+This Python scraper collects article listings from a selected Google News category or subcategory. It extracts headlines, Google News URLs, publishers, publication dates, and authors when available. It can also capture related-story group information.
 
-Built for developers, data teams, and businesses, it’s ideal for scraping Google News at scale for media monitoring, market research, and trend analysis.
+The script uses Requests and BeautifulSoup to process the HTML returned by a single request. It **does not** search Google News by keyword, scroll for more results, or visit individual publishers to retrieve full articles.
 
 ## Features
 
-- **Rotating proxy support**. Utilizes proxy rotation to prevent IP blocking and maintain uninterrupted access to Google News.
-- **Extract headlines, summaries, sources, and publication dates**. Gathers essential article details for comprehensive news data analysis. 
-- **Parse HTML content using Beautiful Soup**. Employs BeautifulSoup to navigate and extract structured data from Google News pages.
-- **Automate data collection with Python scripts**:. Uses Python for scripting automated news data extraction processes.
+- **Category and subcategory selection**. Paste a Google News URL under `/topics/`, including `/topics/.../sections/...` subcategory URLs.
+- **Residential proxy support**. Send requests through Decodo proxies using credentials stored in `.env`.
+- **Article metadata extraction**. Collect titles, links, publishers, publication timestamps, authors, and related-story information when available.
+- **Configurable output**. Choose a result limit, filter articles by publication age, and optionally keep only the lead article from each identified story group.
+- **CSV export**. Save the results to `scraped_articles.csv` for further analysis.
 
 ## Installation
 
-Before you start scraping, let’s make sure you have the right tools for the job. In this case, your essentials are 
-[Python](https://www.python.org/) and a few powerful libraries that will help you dig through the data with ease:
+1. **Install Python**. Download Python 3.9 or later from the [official website](https://www.python.org/downloads/).
+2. **Install dependencies**:
 
-1. **Install Python**. Make sure that you have the latest Python version should be installed on your machine. You can get it from the [official downloads page](https://www.python.org/downloads/). 
-2. **Install the required libraries**. Requests and Beautiful Soup are the usual staples when it comes to scraping and parsing websites:
+   ```bash
+   pip install requests beautifulsoup4 python-dotenv
+   ```
 
-```
-pip install requests beautifulsoup4
-```
+3. **Configure your Decodo residential proxy**. Create a `.env` file in the same directory as `google-news-topic-with-proxies.py` and provide your [proxy credentials](https://dashboard.decodo.com/residential-proxies/proxy-setup):
 
-3. **Install Playwright**. Run the following command to get the [Playwright](https://playwright.dev/) library in your Python environment. It allows you to use Playwright’s Python API to interact with browsers:
+   ```dotenv
+   PROXY_SERVER=http://gate.decodo.com:7000
+   PROXY_USERNAME=your_username
+   PROXY_PASSWORD=your_password
+   ```
 
-```
-pip install playwright
-```
+   Alternatively, set a single `PROXY_URL` with the credentials included. Never commit your `.env` file to GitHub.
 
-4. **Install the necessary browsers**. Get the necessary browser binaries (Chromium, Firefox, and WebKit) that Playwright uses to automate browsers. Playwright needs these binaries to run browser automation tasks, but they're not included with the initial library installation:
+4. **Choose a category or subcategory**. Open [Google News](https://news.google.com/), select a category or subcategory, and paste its full URL into `TOPIC_URL` in `google-news-topic-with-proxies.py`. Subcategory URLs include `/sections/`.
 
-```
-python -m playwright install
-```
-5. **Get proxy authentication detail**s. You'll need a username, password, and endpoint information that can be found on the [Decodo dashboard](https://dashboard.decodo.com/residential-proxies/proxy-setup).
-6. **Run the script file**. Run the `google-news-scraper.py` file with the following command:
-```
-python path/to/your/file/google-news-scraper.py
-```
-Here's the breakdown of what the code does:
+5. **Adjust the optional settings**:
 
-1. Loads the Google News website.
-2. Clicks the "Accept all" button to accept cookies.
-3. Finds the URL of the article by its class name.
-4. Finds the title of the article by its class name.
-5. Adds a counter from 0 to count mentions of specified phrases and links scraped.
-6. Iterates over the URLs and access each website.
-7. Finds "proxy" or "proxies" phrases in the websites.
-8. Prints the title, URL, and whether the phrases were found.
-9. Prints the total number of mentions found and links scraped.
-10. Stores the data in a CSV file named `scraped_articles.csv`
-11. Closes the browser.
+   ```python
+   MAX_ITEMS = 50                   # Set to None for all articles in the initial HTML.
+   MAX_AGE_DAYS = None              # Set to 1, 7, or 30 to filter by publication age.
+   INCLUDE_RELATED_ARTICLES = True  # False keeps only the first article per story group.
+   ```
 
-You should see the title, URL, and whether the phrases were printed in the terminal. As a final note, you can change the headless variable value to *True* to save resources and time, as graphically loading each website can be resource-intensive.
+6. **Run the script**:
+
+   ```bash
+   python google-news-topic-with-proxies.py
+   ```
+
+## How it works
+
+1. Fetches the selected Google News topic page through the configured proxy.
+2. Parses the returned HTML using BeautifulSoup and finds article links and their metadata.
+3. Applies publication-date and related-story filters, followed by the result limit.
+4. Saves the selected records to `scraped_articles.csv` and prints a summary of the extracted fields and output path.
+
+It uses only the initial HTML response, so increasing `MAX_ITEMS` won't trigger infinite scrolling or retrieve further pages. Some articles do not include author or related-story details.
 
 ## Output example
-![Google Maps scraper output example](https://images.decodo.com/Google_news_data_d71cfb1cb2/Google_news_data_d71cfb1cb2.png)
+
+The output CSV includes these columns:
+
+| Title | URL | Source | Published | Author | Story Group | Story URL |
+| --- | --- | --- | --- | --- | --- | --- |
+| Article headline | Google News `/read/` link | Publisher | ISO 8601 timestamp | If available | If available | Google News `/stories/` link, if available |
+
+**Access restrictions**: As checked in October 2026, Google News' [robots.txt](https://news.google.com/robots.txt) allowed `/topics/` pages but disallowed its search and RSS search endpoints. Check the current robots.txt and [Google's Terms of Service](https://policies.google.com/terms) before scraping. Proxies do not override access restrictions.
 
 ## Further reading
 For a more in-depth tutorial on how to create your own Google News scraper with Python, read the [full blog post](https://decodo.com/blog/how-to-scrape-google-news). 
