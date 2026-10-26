@@ -1,0 +1,4 @@
+.env
+*.csv
+google_news_debug.html
+__pycache__/
